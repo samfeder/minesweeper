@@ -1,4 +1,5 @@
 #encoding: UTF-8
+require 'yaml'
 
 class Minesweeper
 
@@ -11,6 +12,10 @@ class Minesweeper
                 [1,0],
                 [1,-1] ]
 
+  def self.load(file)
+    YAML::load(File.open("#{file}.sweep")).play
+  end
+
   def self.make_board(size)
     Array.new(size){Array.new(size, 0)}
   end
@@ -18,18 +23,27 @@ class Minesweeper
   def initialize(bomb_count = 10, size = 9)
     @board = self.class.make_board(size)
     @bomb_positions = []
-    @coord_set = coord_set(size).sort
+    @coord_set = build_coord_set(size).sort
     place_bombs(bomb_count)
     set_frontier
-  end
 
-  def play
     @visible = []
     @flagged = []
+  end
+
+  attr_reader :bomb_positions, :coord_set, :visible, :flagged, :board
+
+  def play
+    puts "To save your game type 'save', or 'load' to load a previous game"
 
     while player_moves?
       render
-      request_pos
+      puts "type 'flag' to plant a flag, otherwise type coords."
+      input = gets.chomp.downcase
+      if input == 'save'
+        return save_game
+      end
+      request_pos(input)
     end
 
     if player_wins?
@@ -42,9 +56,7 @@ class Minesweeper
     render
   end
 
-  def request_pos
-    puts "type 'flag' to plant a flag otherwise type coords."
-    input = gets.chomp.downcase
+  def request_pos(input)
     input == "flag" ? plant_flag : handle_reveal(convert_str_coords(input))
   end
 
@@ -56,6 +68,22 @@ class Minesweeper
       end
     end
   end
+
+  def save_game
+    puts "what do you want to call your game?"
+    game_name = gets.chomp
+    File.open("#{game_name}.sweep", 'w') { |f| f.write(self.to_yaml) }
+    puts "Game saved!"
+  end
+
+  # def load_game(file)
+  #
+  #   @coord_set = g.coord_set
+  #   @bomb_positions = g.bomb_positions
+  #   @visible = g.visible
+  #   @board = g.board
+  #   @flagged = g.flagged
+  # end
 
   def plant_flag
     puts "Ok, please input coords for the flag (csv please)."
@@ -79,7 +107,7 @@ class Minesweeper
     (@coord_set - @visible - @bomb_positions).empty?
   end
 
-  def coord_set(size)
+  def build_coord_set(size)
     [].tap do |coords|
       size.times do |row|
         size.times do |col|
@@ -162,9 +190,11 @@ class Minesweeper
     puts "\n\n"
   end
 
-
 end
 
-
-new_game = Minesweeper.new
-new_game.play
+if __FILE__ == $PROGRAM_NAME
+  file = ARGV.shift
+  Minesweeper.load(file) if file
+  game = Minesweeper.new
+  game.play
+end
