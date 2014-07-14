@@ -1,16 +1,14 @@
 require 'set'
 
 class Minesweeper
-  NEIGHBORS = [
-                [-1,1],
+  NEIGHBORS = [ [-1,1],
                 [-1,0],
                 [-1,-1],
                 [0,1],
                 [0,-1],
                 [1,1],
                 [1,0],
-                [1,-1]
-              ]
+                [1,-1] ]
 
   def self.make_board(size)
     Array.new(size){Array.new(size, 0)}
@@ -19,6 +17,7 @@ class Minesweeper
   def initialize(bomb_count = 10, size = 9)
     @board = self.class.make_board(size)
     @bomb_positions = Set.new
+    @coord_set = coord_set(size).sort
     place_bombs(bomb_count)
     set_frontier
     play
@@ -27,6 +26,56 @@ class Minesweeper
   def play
     @visible = []
     @flagged = []
+    while player_moves?
+      pos = request_pos
+      handle(pos)
+    end
+
+    if player_wins?
+      puts "Player wins!"
+    else
+      puts "You picked a bomb, you lose!"
+    end
+
+    @visible = @coord_set
+    render
+
+  end
+
+  def request_pos
+
+  end
+
+  def handle(pos)
+
+  end
+
+  def player_moves?
+    !(player_wins? || player_loses?)
+  end
+
+  def player_loses?
+    if @bomb_positions - @visible != @bomb_positions
+      puts "ya lost!"
+      true
+    end
+  end
+
+  def player_wins?
+    if !(@coord_set - @visible - @bomb_positions).empty?
+      puts "you win!"
+      true
+    end
+  end
+
+  def coord_set(size)
+    [].tap do |coords|
+      size.times do |row|
+        size.times do |col|
+          coords << [row, col]
+        end
+      end
+    end
   end
 
   def place_bombs(bomb_count)
@@ -74,22 +123,20 @@ class Minesweeper
   end
 
   def render
-
     @board.size.times do |row|
-
       row.size.times do |col|
 
         if @visible.include?([row,col])
-
           if self[[row,col]] != 0
             print " #{self[[row,col]]} "
           else
             print "   "
           end
+        elsif @flags.include([row,col])
+          print " F "
         else
           print " * "
         end
-
 
       end
       print "\n"
