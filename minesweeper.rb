@@ -20,13 +20,13 @@ class Minesweeper
     @coord_set = coord_set(size).sort
     place_bombs(bomb_count)
     set_frontier
-    play
   end
 
   def play
     @visible = []
     @flagged = []
     while player_moves?
+      render
       request_pos
     end
 
@@ -49,9 +49,8 @@ class Minesweeper
   def handle_reveal(pos)
     @visible << pos
     if self[pos] == 0
-      NEIGHBORS.each do |n|
-        curr = combine_pos(pos, n)
-        handle_reveal(curr) if !@visible.include?(curr)
+      valid_neighbors(pos).each do |n|
+        handle_reveal(n) if !@visible.include?(n)
       end
     end
   end
@@ -71,11 +70,11 @@ class Minesweeper
   end
 
   def player_loses?
-    @bomb_positions - @visible != @bomb_positions
+    @bomb_positions.to_a - @visible != @bomb_positions.to_a
   end
 
   def player_wins?
-    !(@coord_set - @visible - @bomb_positions).empty?
+    (@coord_set - @visible - @bomb_positions.to_a).empty?
   end
 
   def coord_set(size)
@@ -133,16 +132,17 @@ class Minesweeper
   end
 
   def render
+    print "\n"
     @board.size.times do |row|
-      row.size.times do |col|
-
+      print "\t\t"
+      @board.size.times do |col| #what the fuck?
         if @visible.include?([row,col])
           if self[[row,col]] != 0
             print " #{self[[row,col]]} "
           else
             print "   "
           end
-        elsif @flags.include([row,col])
+        elsif @flagged.include?([row,col]) && player_moves?
           print " F "
         else
           print " * "
@@ -151,16 +151,14 @@ class Minesweeper
       end
       print "\n"
     end
+    print "\n"
   end
 
 
 end
 
 
-
-
 new_game = Minesweeper.new
 new_game.secret_render
-new_game.set_frontier
-puts "\n\n"
-new_game.render
+new_game.play
+new_game.secret_render
