@@ -1,4 +1,3 @@
-require 'set'
 
 class Minesweeper
   NEIGHBORS = [ [-1,1],
@@ -16,7 +15,7 @@ class Minesweeper
 
   def initialize(bomb_count = 10, size = 9)
     @board = self.class.make_board(size)
-    @bomb_positions = Set.new
+    @bomb_positions = []
     @coord_set = coord_set(size).sort
     place_bombs(bomb_count)
     set_frontier
@@ -36,7 +35,7 @@ class Minesweeper
       puts "You picked a bomb, you lose!"
     end
 
-    @visible << @bomb_positions
+    @visible += @bomb_positions
     render
   end
 
@@ -57,7 +56,8 @@ class Minesweeper
 
   def plant_flag
     puts "Ok, please input coords for the flag (csv please)."
-    @flagged << convert_str_coords(gets.chomp)
+    flag = convert_str_coords(gets.chomp)
+    @flagged.include?(flag) ? @flagged.delete(flag) : @flagged << flag
   end
 
   def convert_str_coords(pos_str)
@@ -70,11 +70,11 @@ class Minesweeper
   end
 
   def player_loses?
-    @bomb_positions.to_a - @visible != @bomb_positions.to_a
+    @bomb_positions - @visible != @bomb_positions
   end
 
   def player_wins?
-    (@coord_set - @visible - @bomb_positions.to_a).empty?
+    (@coord_set - @visible - @bomb_positions).empty?
   end
 
   def coord_set(size)
@@ -92,7 +92,8 @@ class Minesweeper
       i = rand(0...@board.size)
       j = rand(0...@board.size)
       self[[i,j]] = :b
-      @bomb_positions.add([i,j])
+      @bomb_positions << [i,j]
+      @bomb_positions.uniq
     end
   end
 
@@ -159,6 +160,4 @@ end
 
 
 new_game = Minesweeper.new
-new_game.secret_render
 new_game.play
-new_game.secret_render
