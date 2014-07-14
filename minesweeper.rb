@@ -20,6 +20,13 @@ class Minesweeper
     @board = self.class.make_board(size)
     @bomb_positions = Set.new
     place_bombs(bomb_count)
+    set_frontier
+    play
+  end
+
+  def play
+    @visible = []
+    @flagged = []
   end
 
   def place_bombs(bomb_count)
@@ -60,18 +67,43 @@ class Minesweeper
     [pos1[0] + change[0], pos1[1] +change[1]]
   end
 
-  def render
+  def secret_render
     @board.each do |row|
       puts "\t#{row}"
     end
   end
+
+  def render
+
+    @board.size.times do |row|
+
+      row.size.times do |col|
+
+        if @visible.include?([row,col])
+
+          if self[[row,col]] != 0
+            print " #{self[[row,col]]} "
+          else
+            print "   "
+          end
+        else
+          print " * "
+        end
+
+
+      end
+      print "\n"
+    end
+  end
+
+
 end
 
 
 
 
 new_game = Minesweeper.new
-new_game.render
+new_game.secret_render
 new_game.set_frontier
 puts "\n\n"
 new_game.render
