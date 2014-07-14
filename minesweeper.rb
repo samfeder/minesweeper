@@ -1,4 +1,3 @@
-
 class Minesweeper
   NEIGHBORS = [ [-1,1],
                 [-1,0],
@@ -133,9 +132,13 @@ class Minesweeper
   end
 
   def render
-    print "\n"
+    top_spacer = "\n\t\t    #{(0..@board.size - 1).to_a.join("  ")}  "
+    puts "#{top_spacer}\n"
+    dashes = "---" * @board.size
+    puts "\t\t   #{dashes}"
+
     @board.size.times do |row|
-      print "\t\t"
+      print "\t\t#{row} |"
       @board.size.times do |col| #what the fuck?
         if @visible.include?([row,col])
           if self[[row,col]] != 0
@@ -150,9 +153,10 @@ class Minesweeper
         end
 
       end
-      print "\n"
+      print "|\n"
     end
-    print "\n"
+    puts "\t\t   #{dashes}";
+    puts "\n\n"
   end
 
 
