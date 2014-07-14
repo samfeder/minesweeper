@@ -26,24 +26,23 @@ class Minesweeper
     while @bomb_positions.size < bomb_count
       i = rand(0...@board.size)
       j = rand(0...@board.size)
-      p @board[i][j] = :bomb
+      self[[i,j]] = :b
       @bomb_positions.add([i,j])
     end
   end
 
   def [](pos) # -> [x,y]
-    @board[pos[0], pos[1]]
+    @board[pos[0]][pos[1]]
   end
 
   def []=(pos, value) # -> [x,y]
-    @board[pos[0], pos[1]] = value
+    @board[pos[0]][pos[1]] = value
   end
 
   def set_frontier
     @bomb_positions.each do |bomb|
       valid_neighbors(bomb).each do |neighbor|
-        p neighbor
-        self[neighbor] += 1 unless self[neighbor] == :bomb
+        self[neighbor] += 1 unless self[neighbor] == :b
       end
     end
   end
@@ -51,7 +50,7 @@ class Minesweeper
   def valid_neighbors(pos)
     positions = []
     NEIGHBORS.each do |n|
-      p positions << combine_pos(pos, n)
+      positions << combine_pos(pos, n)
     end
 
     positions.reject { |p| p.max >= @board.size || p.min < 0 }
