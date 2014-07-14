@@ -1,4 +1,7 @@
+#encoding: UTF-8
+
 class Minesweeper
+
   NEIGHBORS = [ [-1,1],
                 [-1,0],
                 [-1,-1],
@@ -23,6 +26,7 @@ class Minesweeper
   def play
     @visible = []
     @flagged = []
+
     while player_moves?
       render
       request_pos
@@ -39,7 +43,7 @@ class Minesweeper
   end
 
   def request_pos
-    puts "type flag if you'd like to plant a flag, otherwise, type coords."
+    puts "type 'flag' to plant a flag otherwise type coords."
     input = gets.chomp.downcase
     input == "flag" ? plant_flag : handle_reveal(convert_str_coords(input))
   end
@@ -60,8 +64,7 @@ class Minesweeper
   end
 
   def convert_str_coords(pos_str)
-    pos_arr = pos_str.split(',')
-    [pos_arr[0].to_i, pos_arr[1].to_i]
+    pos_str.split(',').map(&:to_i)
   end
 
   def player_moves?
@@ -90,7 +93,7 @@ class Minesweeper
     while @bomb_positions.size < bomb_count
       i = rand(0...@board.size)
       j = rand(0...@board.size)
-      self[[i,j]] = :b
+      self[[i,j]] = :*
       @bomb_positions << [i,j]
       @bomb_positions.uniq
     end
@@ -107,7 +110,7 @@ class Minesweeper
   def set_frontier
     @bomb_positions.each do |bomb|
       valid_neighbors(bomb).each do |neighbor|
-        self[neighbor] += 1 unless self[neighbor] == :b
+        self[neighbor] += 1 unless self[neighbor] == :*
       end
     end
   end
@@ -139,7 +142,7 @@ class Minesweeper
 
     @board.size.times do |row|
       print "\t\t#{row} |"
-      @board.size.times do |col| #what the fuck?
+      @board.size.times do |col|
         if @visible.include?([row,col])
           if self[[row,col]] != 0
             print " #{self[[row,col]]} "
@@ -147,9 +150,9 @@ class Minesweeper
             print "   "
           end
         elsif @flagged.include?([row,col]) && player_moves?
-          print " F "
+          print " ⚑ "
         else
-          print " * "
+          print " ❒ "
         end
 
       end
