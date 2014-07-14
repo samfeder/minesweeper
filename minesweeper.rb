@@ -73,4 +73,5 @@ end
 new_game = Minesweeper.new
 new_game.render
 new_game.set_frontier
+puts "\n\n"
 new_game.render
