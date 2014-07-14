@@ -27,8 +27,7 @@ class Minesweeper
     @visible = []
     @flagged = []
     while player_moves?
-      pos = request_pos
-      handle(pos)
+      request_pos
     end
 
     if player_wins?
@@ -37,17 +36,34 @@ class Minesweeper
       puts "You picked a bomb, you lose!"
     end
 
-    @visible = @coord_set
+    @visible << @bomb_positions
     render
-
   end
 
   def request_pos
-
+    puts "type flag if you'd like to plant a flag, otherwise, type coords."
+    input = gets.chomp.downcase
+    input == "flag" ? plant_flag : handle_reveal(convert_str_coords(input))
   end
 
-  def handle(pos)
+  def handle_reveal(pos)
+    @visible << pos
+    if self[pos] == 0
+      NEIGHBORS.each do |n|
+        curr = combine_pos(pos, n)
+        handle_reveal(curr) if !@visible.include?(curr)
+      end
+    end
+  end
 
+  def plant_flag
+    puts "Ok, please input coords for the flag (csv please)."
+    @flagged << convert_str_coords(gets.chomp)
+  end
+
+  def convert_str_coords(pos_str)
+    pos_arr = pos_str.split(',')
+    [pos_arr[0].to_i, pos_arr[1].to_i]
   end
 
   def player_moves?
@@ -55,17 +71,11 @@ class Minesweeper
   end
 
   def player_loses?
-    if @bomb_positions - @visible != @bomb_positions
-      puts "ya lost!"
-      true
-    end
+    @bomb_positions - @visible != @bomb_positions
   end
 
   def player_wins?
-    if !(@coord_set - @visible - @bomb_positions).empty?
-      puts "you win!"
-      true
-    end
+    !(@coord_set - @visible - @bomb_positions).empty?
   end
 
   def coord_set(size)
